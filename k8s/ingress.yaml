@@ -1,0 +1,22 @@
+# The external ALB and its NodePort target group are provisioned in
+# Terraform (starttech-infra, modules/cdn/alb.tf), per the assessment's
+# allowance for "explicit NodePort targets for an external application
+# load balancer configured in Terraform". This Ingress documents the
+# routing intent and remains inert without the AWS LB Controller.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-api
+  annotations:
+    kubernetes.io/ingress.class: alb
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-api
+                port:
+                  number: 8080

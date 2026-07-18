@@ -71,3 +71,5 @@ export default defineConfig([
   },
 ])
 ```
+
+Deployed via GitHub Actions to S3 and CloudFront.

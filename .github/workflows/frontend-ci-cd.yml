@@ -1,0 +1,56 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+
+env:
+  S3_BUCKET: starttech-frontend-bucket-joshfadero
+  CLOUDFRONT_DISTRIBUTION_ID: E2SQTPVA8HKV1H
+  VITE_API_BASE_URL: /api
+
+jobs:
+  build-and-deploy:
+    name: Build, scan and deploy frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security scan
+        run: npm audit --audit-level=critical
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Upload to S3
+        run: aws s3 sync dist/ s3://${{ env.S3_BUCKET }} --delete
+
+      - name: Invalidate CloudFront cache
+        run: >
+          aws cloudfront create-invalidation
+          --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }}
+          --paths "/*"

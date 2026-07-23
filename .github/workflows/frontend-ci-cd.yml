@@ -8,7 +8,7 @@ on:
 
 env:
   S3_BUCKET: starttech-frontend-bucket-joshfadero
-  CLOUDFRONT_DISTRIBUTION_ID: E24M9IO6M3FPHZ
+  CLOUDFRONT_DISTRIBUTION_ID: E1012W7VH18ZMU
   VITE_API_BASE_URL: /api
 
 jobs:
